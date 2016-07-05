@@ -279,7 +279,7 @@ public class ChicagoTSClientTest {
         "                                                                    end!!"+i;
 			byte[] val = _v.getBytes();
 			assertNotNull(chicagoTSClient.write("tskey".getBytes(), val));
-			// System.out.println(i);
+			System.out.println(i);
 		}
 
     String delimiter = ChiUtil.delimiter;

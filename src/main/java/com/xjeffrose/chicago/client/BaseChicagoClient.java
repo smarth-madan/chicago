@@ -33,7 +33,7 @@ public class BaseChicagoClient {
   protected final static String NODE_LIST_PATH = "/chicago/node-list";
   public final static String REPLICATION_LOCK_PATH ="/chicago/replication-lock";
   protected static final long TIMEOUT = 1000;
-  protected static boolean TIMEOUT_ENABLED = true;
+  protected static boolean TIMEOUT_ENABLED = false;
   protected static int MAX_RETRY = 3;
   protected final AtomicInteger nodesAvailable = new AtomicInteger(0);
 
@@ -55,7 +55,7 @@ public class BaseChicagoClient {
       }
   };
   protected final ZkClient zkClient;
-  protected final ConnectionPoolManager connectionPoolMgr;
+  protected final ConnectionPoolManager2 connectionPoolMgr;
   protected int quorum;
 
   public BaseChicagoClient(String address){
@@ -66,7 +66,7 @@ public class BaseChicagoClient {
     nodeList.add(address);
     this.rendezvousHash =  new RendezvousHash(Funnels.stringFunnel(Charset.defaultCharset()), nodeList, quorum);
     clientNodeWatcher = null;
-    this.connectionPoolMgr = new ConnectionPoolManager(address);
+    this.connectionPoolMgr = new ConnectionPoolManager2(address);
   }
 
   public BaseChicagoClient(String zkConnectionString, int quorum) throws InterruptedException {
@@ -78,7 +78,7 @@ public class BaseChicagoClient {
     ArrayList<String> nodeList = new ArrayList<>();
     this.rendezvousHash = new RendezvousHash(Funnels.stringFunnel(Charset.defaultCharset()), nodeList, quorum);
     clientNodeWatcher = new ClientNodeWatcher(zkClient, rendezvousHash, listener);
-    this.connectionPoolMgr = new ConnectionPoolManager(zkClient);
+    this.connectionPoolMgr = new ConnectionPoolManager2(zkClient);
   }
 
   public void start() {

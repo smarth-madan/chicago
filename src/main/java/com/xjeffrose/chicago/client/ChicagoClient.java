@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.xjeffrose.chicago.DefaultChicagoMessage;
 import com.xjeffrose.chicago.Op;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import java.util.List;
 import java.util.UUID;
@@ -83,13 +84,13 @@ public class ChicagoClient extends BaseChicagoClient {
         for (String node : hashList) {
           if (node == null) {
           } else {
-            ChannelFuture cf = connectionPoolMgr.getNode(node);
-            if (cf.channel().isWritable()) {
+            Channel cf = connectionPoolMgr.getNode(node);
+            if (cf.isWritable()) {
               exe.execute(() -> {
                   UUID id = UUID.randomUUID();
                   Listener listener = connectionPoolMgr.getListener(node); //Blocking
                   listenerList.add(listener);
-                  cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.READ, colFam, key, null));
+                  cf.writeAndFlush(new DefaultChicagoMessage(id, Op.READ, colFam, key, null));
                   listener.addID(id);
                   idList.add(id);
               });
@@ -148,12 +149,12 @@ public class ChicagoClient extends BaseChicagoClient {
         for (String node : hashList) {
           if (node == null) {
           } else {
-            ChannelFuture cf = connectionPoolMgr.getNode(node);
-            if (cf.channel().isWritable()) {
+            Channel cf = connectionPoolMgr.getNode(node);
+            if (cf.isWritable()) {
               exe.execute(() -> {
                   UUID id = UUID.randomUUID();
                   Listener listener = connectionPoolMgr.getListener(node); //Blocking
-                  cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.READ, colFam, key, null));
+                  cf.writeAndFlush(new DefaultChicagoMessage(id, Op.READ, colFam, key, null));
                   listener.addID(id);
                   exe.execute(() -> {
                       try {
@@ -234,16 +235,16 @@ public class ChicagoClient extends BaseChicagoClient {
 
           } else {
             log.debug(" +++++++++++++++++++++++++++++++++++++++++++++ Getting Node");
-            ChannelFuture cf = connectionPoolMgr.getNode(node);
+            Channel cf = connectionPoolMgr.getNode(node);
             log.debug(" +++++++++++++++++++++++++++++++++++++++++++++ Got Node");
-            if (cf.channel().isWritable()) {
+            if (cf.isWritable()) {
               writeState.nodeState(node, "dispatch");
               exe.execute(() -> {
                   UUID id = UUID.randomUUID();
                   log.debug(" +++++++++++++++++++++++++++++++++++++++++++++ Getting Listener");
                   Listener listener = connectionPoolMgr.getListener(node); // Blocking
                   writeState.nodeState(node, "write");
-                  cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.WRITE, colFam, key, value));
+                  cf.writeAndFlush(new DefaultChicagoMessage(id, Op.WRITE, colFam, key, value));
                   writeState.nodeState(node, "finished writing");
                   log.debug("++++++++++++++++++++++++++++++++++++++++ Write to node: " + node + " " + new String(key));
                   listener.addID(id);
@@ -343,12 +344,12 @@ public class ChicagoClient extends BaseChicagoClient {
           if (node == null) {
 
           } else {
-            ChannelFuture cf = connectionPoolMgr.getNode(node);
-            if (cf.channel().isWritable()) {
+            Channel cf = connectionPoolMgr.getNode(node);
+            if (cf.isWritable()) {
               exe.execute(() -> {
                 UUID id = UUID.randomUUID();
                 Listener listener = connectionPoolMgr.getListener(node);
-                cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.DELETE, colFam, null, null));
+                cf.writeAndFlush(new DefaultChicagoMessage(id, Op.DELETE, colFam, null, null));
                 listener.addID(id);
                 exe.execute(() -> {
                   try {
@@ -413,12 +414,12 @@ public class ChicagoClient extends BaseChicagoClient {
           if (node == null) {
 
           } else {
-            ChannelFuture cf = connectionPoolMgr.getNode(node);
-            if (cf.channel().isWritable()) {
+            Channel cf = connectionPoolMgr.getNode(node);
+            if (cf.isWritable()) {
               exe.execute(() -> {
                   UUID id = UUID.randomUUID();
                   Listener listener = connectionPoolMgr.getListener(node);
-                  cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.DELETE, colFam, key, null));
+                  cf.writeAndFlush(new DefaultChicagoMessage(id, Op.DELETE, colFam, key, null));
                   listener.addID(id);
                   exe.execute(() -> {
                       try {

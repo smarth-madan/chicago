@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConnectionPoolManager {
-  private static final Logger log = LoggerFactory.getLogger(ChicagoClient.class);
+  private static final Logger log = LoggerFactory.getLogger(ConnectionPoolManager.class);
   private final static String NODE_LIST_PATH = "/chicago/node-list";
   private static final long TIMEOUT = 1000;
   private static boolean TIMEOUT_ENABLED = true;
@@ -112,7 +112,7 @@ public class ConnectionPoolManager {
     cf.channel().close();
     cf.cancel(true);
     connectionMap.remove(node);
-    log.debug("removing and reconnecting to "+ node);
+    log.info("removing and reconnecting to "+ node);
     connect(new InetSocketAddress(node, 12000), listenerMap.get(node));
     return getNode(node);
 
