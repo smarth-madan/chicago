@@ -149,6 +149,12 @@ public class ChicagoTSClientTest {
 
 	}
 
+  @Test
+  public void CheckReconnection() throws Exception{
+    System.out.println(chicagoTSClient.getNodeList("tsKey".getBytes()).toString());
+    Thread.sleep(70000);
+  }
+
 	@Test
 	public void transactStreamWhileWritingDifferentClients() throws Exception {
 		for (int i = 0; i < 10; i++) {
@@ -278,7 +284,7 @@ public class ChicagoTSClientTest {
         "                                                                          " +
         "                                                                    end!!"+i;
 			byte[] val = _v.getBytes();
-			assertNotNull(chicagoTSClient.write("tskey".getBytes(), val));
+			chicagoTSClient.write("tskey".getBytes(), val);
 			System.out.println(i);
 		}
 

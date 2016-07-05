@@ -1,13 +1,11 @@
 package com.xjeffrose.chicago.client;
 
 import com.xjeffrose.chicago.ZkClient;
-import com.xjeffrose.xio.SSL.XioSecurityHandlerImpl;
 import com.xjeffrose.xio.client.XioConnectionPool;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -78,15 +76,20 @@ public class ConnectionPoolManager2 {
 
   private Channel _getNode(String node) throws ChicagoClientTimeoutException {
     Channel ch = null;
-    long start = System.currentTimeMillis();
+    long start = 0;
     try {
+      start = System.currentTimeMillis();
       Future<Channel> fch = connectionPoolMap.get(node).acquire();
-      ch = fch.syncUninterruptibly().getNow();
+      System.out.println("Time to get future " + (System.currentTimeMillis() - start)+ "ms");
+      while(!fch.isSuccess()){
+      }
+      System.out.println("Time to wait" + (System.currentTimeMillis() - start)+ "ms");
+      ch=fch.getNow();
+      System.out.println("Time to get channel " + ch.toString() + " " + (System.currentTimeMillis() - start)+ "ms");
     }catch (Exception e){
       e.printStackTrace();
       throw new ChicagoClientTimeoutException();
     }
-    System.out.println("Time to get channel " + ch.toString() + " " + (System.currentTimeMillis() - start)+ "ms");
     return ch;
   }
 

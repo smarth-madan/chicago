@@ -19,10 +19,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,6 +43,7 @@ public class ConnectionPoolManager {
   private final NioEventLoopGroup workerLoop = new NioEventLoopGroup(20);
   private final ZkClient zkClient;
   private final AtomicBoolean running = new AtomicBoolean(false);
+  private final ScheduledExecutorService connectCheck = Executors.newSingleThreadScheduledExecutor();
 
   public ConnectionPoolManager(ZkClient zkClient) {
     this.zkClient = zkClient;
@@ -69,6 +73,21 @@ public class ConnectionPoolManager {
     workerLoop.shutdownGracefully();
   }
 
+  public void checkConnection(){
+    List<String> reconnectNodes = new ArrayList<>();
+    connectionMap.forEach((k,v) ->{
+      if(!v.channel().isWritable()){
+        log.debug("Channel not writable for "+ k);
+        reconnectNodes.add(k);
+      }
+    });
+
+    reconnectNodes.forEach(s -> {
+      connectionMap.remove(s);
+      connect(address(s), listenerMap.get(s));
+    });
+  }
+
   private List<String> buildNodeList() {
     return zkClient.list(NODE_LIST_PATH);
   }
@@ -83,6 +102,13 @@ public class ConnectionPoolManager {
       listenerMap.put(xs, new ChicagoListener());
       connect(address(xs), listenerMap.get(xs));
     });
+
+    connectCheck.scheduleAtFixedRate(new Runnable() {
+      @Override
+      public void run() {
+        checkConnection();
+      }
+    },10,500,TimeUnit.MILLISECONDS);
   }
 
   public ChannelFuture getNode(String node) throws ChicagoClientTimeoutException {
@@ -107,15 +133,9 @@ public class ConnectionPoolManager {
 
     if (cf.channel().isWritable()) {
       return cf;
+    }else{
+      return getNode(node);
     }
-
-    cf.channel().close();
-    cf.cancel(true);
-    connectionMap.remove(node);
-    log.info("removing and reconnecting to "+ node);
-    connect(new InetSocketAddress(node, 12000), listenerMap.get(node));
-    return getNode(node);
-
   }
 
   public Listener getListener(String node) {
@@ -144,7 +164,7 @@ public class ConnectionPoolManager {
             ChannelPipeline cp = channel.pipeline();
             cp.addLast(new XioSecurityHandlerImpl(true).getEncryptionHandler());
 //            cp.addLast(new XioSecurityHandlerImpl(true).getAuthenticationHandler());
-            //cp.addLast(new XioIdleDisconnectHandler(60, 60, 60));
+            cp.addLast(new XioIdleDisconnectHandler(20, 20, 20));
             cp.addLast(new ChicagoClientCodec());
             cp.addLast(new ChicagoClientHandler(listener));
           }

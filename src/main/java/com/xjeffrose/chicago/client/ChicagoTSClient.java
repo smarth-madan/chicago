@@ -42,8 +42,8 @@ public class ChicagoTSClient extends BaseChicagoClient {
           for (String node : hashList) {
             if (node == null) {
             } else {
-              Channel cf = connectionPoolMgr.getNode(node);
-              if (cf.isWritable()) {
+              ChannelFuture cf = connectionPoolMgr.getNode(node);
+              if (cf.channel().isWritable()) {
                 exe.execute(() -> {
 //                try {
                     UUID id = UUID.randomUUID();
@@ -51,10 +51,10 @@ public class ChicagoTSClient extends BaseChicagoClient {
                     if(cs[0] == null) {
                       cs[0] = new ChicagoStream(listener);
                     }
-                    cf.writeAndFlush(new DefaultChicagoMessage(id, Op.STREAM, key, null, offset));
+                    cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.STREAM, key, null, offset));
                     listener.addID(id);
                     cs[0].addID(id);
-                    connectionPoolMgr.releaseChannel(node,cf);
+                    //connectionPoolMgr.releaseChannel(node,cf);
                 });
               }else{
                 log.info("Channel is not writeable !!!!!"+cf.toString());
@@ -101,12 +101,12 @@ public class ChicagoTSClient extends BaseChicagoClient {
         for (String node : hashList) {
           if (node == null) {
           } else {
-            Channel cf = connectionPoolMgr.getNode(node);
-            if (cf.isWritable()) {
+            ChannelFuture cf = connectionPoolMgr.getNode(node);
+            if (cf.channel().isWritable()) {
               exe.execute(() -> {
                 UUID id = UUID.randomUUID();
                 Listener listener = connectionPoolMgr.getListener(node); //Blocking
-                cf.writeAndFlush(new DefaultChicagoMessage(id, Op.STREAM, key, null, offset));
+                cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.STREAM, key, null, offset));
                 listener.addID(id);
                 exe.execute(() -> {
                   try {
@@ -189,15 +189,15 @@ public class ChicagoTSClient extends BaseChicagoClient {
             if (node == null) {
 
             } else {
-              Channel cf = connectionPoolMgr.getNode(node);
-              if (cf.isWritable()) {
+              ChannelFuture cf = connectionPoolMgr.getNode(node);
+              if (cf.channel().isWritable()) {
                 exe.execute(() -> {
                     UUID id = UUID.randomUUID();
                     Listener listener = connectionPoolMgr.getListener(node); // Blocking
                     if(colFam != null){
-                      cf.writeAndFlush(new DefaultChicagoMessage(id, Op.TS_WRITE, colFam, key, value));
+                      cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.TS_WRITE, colFam, key, value));
                     }else {
-                      cf.writeAndFlush(new DefaultChicagoMessage(id, Op.TS_WRITE, key, null, value));
+                      cf.channel().writeAndFlush(new DefaultChicagoMessage(id, Op.TS_WRITE, key, null, value));
                     }
                     listener.addID(id);
                     idList.add(id);
@@ -210,7 +210,7 @@ public class ChicagoTSClient extends BaseChicagoClient {
                           throw new RuntimeException(e);
                         }
                     });
-                  connectionPoolMgr.releaseChannel(node,cf);
+                  //connectionPoolMgr.releaseChannel(node,cf);
                 });
               }
             }
