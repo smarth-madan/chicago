@@ -81,6 +81,10 @@ public class ChicagoObjectDecoder extends ByteToMessageDecoder {
     msg.readBytes(colFamSize, 0, colFamSize.length);
     final int colFamLength = Ints.fromByteArray(colFamSize);
     final byte[] colFam = new byte[colFamLength];
+    if(colFamLength > (msg.writerIndex() - msg.readerIndex())){
+      msg.resetReaderIndex();
+      return null;
+    }
 
     // Get the Col Fam
     msg.readBytes(colFam, 0, colFam.length);

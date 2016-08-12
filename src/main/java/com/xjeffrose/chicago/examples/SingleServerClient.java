@@ -14,7 +14,7 @@ public class SingleServerClient {
     //ChicagoClient cc = new ChicagoClient("10.24.25.188:2181,10.24.25.189:2181,10.24.33.123:2181,10.25.145.56:2181",3);
     //cc.startAndWaitForNodes(3);
 //    cc.deleteColFam("tsRepKey".getBytes()).get();
-    //write1000("127.0.0.1:12000");
+    write1000("127.0.0.1:12000");
      //write("127.0.0.1:12000","tskey",34,"val34");
     //printStream("10.22.100.183:12000", "ppfe");
     //getValue("10.24.33.123:12000", "writeTestKey",496);
@@ -22,8 +22,8 @@ public class SingleServerClient {
     //getValue("10.25.145.56:12000", "writeTestKey",496);
     //printStream("10.24.25.189:12000");
      //printStream("10.25.145.56:12000");
-     getValue("10.22.100.183:12000","ppfe-msmaster",14608);
-//    printStream("10.24.33.123:12000");
+     //getValue("10.22.100.183:12000","ppfe-msmaster",14608);
+     printStream("127.0.0.1:12000","test");
 
 //      for(int i =30;i<60;i++){
 //        write("10.24.25.188:12000","tskey",i,"val"+i);
@@ -49,7 +49,8 @@ public class SingleServerClient {
   public static void printStream(String host, String colFam){
     try {
       ChicagoClient cc = new ChicagoClient(host);
-      System.out.println(host +" : "+new String(cc.stream(colFam.getBytes(), null).get().get(0)));
+      cc.startAndWaitForNodes(1);
+      System.out.println(host +" : "+new String(cc.stream(colFam.getBytes(), Longs.toByteArray(0l)).get().get(0)));
       cc.stop();
     }catch(Exception e){
       e.printStackTrace();
@@ -78,10 +79,11 @@ public class SingleServerClient {
     String cf = "test";
     String key = "key                                                               ";
     ChicagoClient cc = new ChicagoClient(host);
-    for (int i =200000;i<800000;i++){
-      System.out.print(cc.write(cf.getBytes(),(key+i).getBytes(),("val                                                          " +
+    cc.startAndWaitForNodes(1);
+    for (int i =0;i<1000;i++){
+      System.out.print(cc.tsWrite(cf.getBytes(),("val                                                          " +
         "                                                                             " +
-        "                                                                            "+i).getBytes()));
+        "                                                                            "+i).getBytes()).get().get(0));
     }
   }
 }
