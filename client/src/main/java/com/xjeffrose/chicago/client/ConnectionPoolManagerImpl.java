@@ -75,7 +75,7 @@ public class ConnectionPoolManagerImpl implements ConnectionPoolManager, NodeLis
       connectionMap.get(addr).write(msg, f);
       return f;
     } else {
-      rebuildConnectionMap(addr, connectionMap);
+      //rebuildConnectionMap(addr, connectionMap);
       blockAndAwaitPool();
       return write(addr, msg);
     }

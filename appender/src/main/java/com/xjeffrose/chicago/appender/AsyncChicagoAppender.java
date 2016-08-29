@@ -1,5 +1,6 @@
 package com.xjeffrose.chicago.appender;
 
+import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -59,28 +60,35 @@ public class AsyncChicagoAppender extends AppenderSkeleton {
 
   @Override
   protected void append(LoggingEvent loggingEvent) {
+    long start = System.currentTimeMillis();
+    String message = subAppend(loggingEvent);
     try {
-      String message = subAppend(loggingEvent);
       ListenableFuture<byte[]> chiResp = cs.tsWrite(key.getBytes(), message.getBytes());
       if (chiResp != null) {
         Futures.addCallback(chiResp, new FutureCallback<byte[]>() {
           @Override
           public void onSuccess(@Nullable byte[] bytes) {
-
+            System.out.println("Success " + message + "value :" + Longs.fromByteArray(bytes) );
           }
 
           @Override
           public void onFailure(Throwable throwable) {
             // TODO(JR): Maybe Try again?
+            //Print the message to console
+            System.out.println("FAILURE #########" + message + "  " + throwable.getMessage());
           }
         });
       } else {
-        //Todo : Maybe try again since the future was null.
+        //Todo : Maybe try again since the future was null. At least log it to console.
+        System.out.println("FAILURE 2 #########" + message);
       }
     } catch (Exception e){
+      //Print the message to console
+      System.out.println("########### EXCEPTION 2 #########" + message);
       e.printStackTrace();
       throw new RuntimeException(e);
     }
+    System.out.println("Time taken ="+ (System.currentTimeMillis() - start) + " ms");
   }
 
   @Override
