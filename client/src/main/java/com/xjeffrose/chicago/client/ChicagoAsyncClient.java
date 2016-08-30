@@ -303,13 +303,13 @@ public class ChicagoAsyncClient implements Closeable {
       @Override
       public void onSuccess(@Nullable byte[] bytes) {
         try {
-          resp.set(tsWrite(topic, bytes, val).get(400, TimeUnit.MILLISECONDS));
+          resp.set(tsWrite(topic, bytes, val).get());
         } catch (InterruptedException e) {
           e.printStackTrace();
         } catch (ExecutionException e) {
           e.printStackTrace();
-        } catch (TimeoutException e) {
-          e.printStackTrace();
+        //} catch (TimeoutException e) {
+        //  e.printStackTrace();
         }
       }
 
