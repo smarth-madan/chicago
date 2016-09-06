@@ -191,7 +191,7 @@ public class ReplicationTest {
 
       //Bring the server back up again.
       System.out.println("Starting server " + server);
-      command = "sudo sh -c \"cd /home/smadan/chicago; ./bin/chiServer.sh &\"";
+      command = "sudo sh -c \"cd /home/smadan/chicago/server; ./bin/chiServer.sh &\"";
       remoteExec(server, command);
 
       Thread.sleep(2000);

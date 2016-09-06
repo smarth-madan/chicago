@@ -34,11 +34,11 @@
 
   <logger name="com.xjeffrose.chicago" level="info"
           additivity="false">
-    <appender-ref ref="FILE-AUDIT" />
+    <appender-ref ref="STDOUT" />
   </logger>
 
   <root level="info">
-    <appender-ref ref="FILE-AUDIT" />
+    <appender-ref ref="STDOUT" />
   </root>
 
 </configuration>

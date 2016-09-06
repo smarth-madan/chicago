@@ -66,16 +66,18 @@ public class AsyncChicagoAppender extends AppenderSkeleton {
         Futures.addCallback(chiResp, new FutureCallback<byte[]>() {
           @Override
           public void onSuccess(@Nullable byte[] bytes) {
-
+            System.out.println("Got success " + message);
           }
 
           @Override
           public void onFailure(Throwable throwable) {
             // TODO(JR): Maybe Try again?
+            System.out.println("Got failure " + message);
           }
         });
       } else {
         //Todo : Maybe try again since the future was null.
+        System.out.println("NUll returned on write " + message);
       }
     } catch (Exception e){
       e.printStackTrace();

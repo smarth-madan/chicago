@@ -26,12 +26,12 @@ public class AsyncChicagoAppenderTest {
     }
   }
 
-  //@Test
+  @Test
   public void testActuaLogging() throws InterruptedException {
     Logger log = Logger.getLogger(AsyncChicagoAppenderTest.class.getName());
     try {
       AsyncChicagoAppender chicagoAppender = new AsyncChicagoAppender();
-      chicagoAppender.setChicagoZk("10.24.24.235:2181,10.24.23.231:2181,10.24.24.23:2181,10.24.23.230:2181");
+      chicagoAppender.setChicagoZk("10.24.25.188:2181,10.24.25.189:2181,10.24.33.123:2181,10.25.145.56:2181");
       chicagoAppender.setKey("ppfe");
       chicagoAppender.setLayout(new PatternLayout());
       chicagoAppender.setThreshold(Priority.INFO);
@@ -47,10 +47,11 @@ public class AsyncChicagoAppenderTest {
       log.info("Falling back to default Logger");
     }
 
-    for(int i =0 ;i<100;i++ ){
+    for(int i =0 ;i<2000;i++ ){
       try {
-        System.out.println("Logging data " + i);
+        long start = System.currentTimeMillis();
         log.info("some log " + i);
+        System.out.println("Time taken = "+ (System.currentTimeMillis() - start) + " ms");
         Thread.sleep(1000);
       }catch (Exception e){
         e.printStackTrace();

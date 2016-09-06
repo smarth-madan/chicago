@@ -1,5 +1,6 @@
 package com.xjeffrose.chicago.client;
 
+import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -18,10 +19,15 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.internal.PlatformDependent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -204,7 +210,103 @@ public class ChicagoAsyncClientTest {
 //    });
 
     l.await(2000, TimeUnit.MILLISECONDS);
+  }
 
+  @Test
+  public void testSuccessfulAsListFuture(){
+    final List<SettableFuture<byte[]>> futureList = new ArrayList<>();
+    SettableFuture<byte[]> f1 = SettableFuture.create();
+    futureList.add(f1);
+    SettableFuture<byte[]> f2 = SettableFuture.create();
+    futureList.add(f2);
+    SettableFuture<byte[]> f3 = SettableFuture.create();
+    futureList.add(f3);
+    SettableFuture<Boolean> respFuture = SettableFuture.create();
+    CountDownLatch latch = new CountDownLatch(1);
+
+    Futures.addCallback(Futures.allAsList(futureList), new FutureCallback<List<byte[]>>() {
+      @Override
+      public void onSuccess(@Nullable List<byte[]> bytes) {
+        System.out.println("Got all responses successfully");
+        respFuture.set(true);
+      }
+
+      @Override
+      public void onFailure(Throwable throwable) {
+        System.out.println("Some responses wewre failure");
+        respFuture.setException(throwable);
+      }
+    });
+
+    Futures.addCallback(respFuture, new FutureCallback<Boolean>() {
+      @Override public void onSuccess(@Nullable Boolean result) {
+        System.out.println("Got true as return value");
+        latch.countDown();
+      }
+
+      @Override public void onFailure(Throwable t) {
+        System.out.println("Got failure as return value");
+      }
+    });
+
+    f1.set(Longs.toByteArray(1));
+    f2.set(Longs.toByteArray(1));
+    f3.set(Longs.toByteArray(1));
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testSuccessfulAsListFutureNegative(){
+    final List<SettableFuture<byte[]>> futureList = new ArrayList<>();
+    SettableFuture<byte[]> f1 = SettableFuture.create();
+    futureList.add(f1);
+    SettableFuture<byte[]> f2 = SettableFuture.create();
+    futureList.add(f2);
+    SettableFuture<byte[]> f3 = SettableFuture.create();
+    futureList.add(f3);
+    SettableFuture<Boolean> respFuture = SettableFuture.create();
+    CountDownLatch latch = new CountDownLatch(1);
+
+    Futures.addCallback(Futures.allAsList(futureList), new FutureCallback<List<byte[]>>() {
+      @Override
+      public void onSuccess(@Nullable List<byte[]> bytes) {
+        System.out.println("Got all responses successfully");
+        respFuture.set(true);
+      }
+
+      @Override
+      public void onFailure(Throwable throwable) {
+        System.out.println("Some responses wewre failure");
+        respFuture.setException(throwable);
+      }
+    });
+
+    Futures.addCallback(respFuture, new FutureCallback<Boolean>() {
+      @Override public void onSuccess(@Nullable Boolean result) {
+        System.out.println("Got true as return value");
+
+      }
+
+      @Override public void onFailure(Throwable t) {
+        System.out.println("Got failure as return value");
+        latch.countDown();
+      }
+    });
+
+    f1.set(Longs.toByteArray(1));
+    f2.set(Longs.toByteArray(1));
+    f3.setException(new RuntimeException("Failure to get data"));
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
 }

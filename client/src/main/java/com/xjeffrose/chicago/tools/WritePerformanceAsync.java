@@ -1,5 +1,6 @@
 package com.xjeffrose.chicago.tools;
 
+import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -37,11 +38,11 @@ public class WritePerformanceAsync {
 //    int throughput = Integer.parseInt(args[3]);
 //    final String connectionString = args[4];
     
-    final int loop = 10;
+    final int loop = 1000000;
     final int size = 100;
     final int clients = 1;
     int throughput = -1;
-    final String connectionString = "10.24.25.188:2181,10.24.25.189:2181,10.25.145.56:2181,10.24.33.123:2181";
+    final String connectionString = "10.24.24.235:2181,10.24.23.231:2181,10.24.24.23:2181,10.24.23.230:2181";
 
     CountDownLatch latch = new CountDownLatch(loop);
     ChicagoAsyncClient[] ctsa = new ChicagoAsyncClient[clients];
@@ -62,7 +63,7 @@ public class WritePerformanceAsync {
     Stats stats = new Stats(loop, 5000, latch);
     System.out.println("########       Statring writes        #########");
     long startTime = System.currentTimeMillis();
-    for (int i = 20; i < 30; i++) {
+    for (int i = 0; i < loop; i++) {
       long sendStart = System.currentTimeMillis();
       byte[] val = new byte[size];
       Random random = new Random(0);
@@ -233,7 +234,7 @@ public class WritePerformanceAsync {
 
     @Override
     public void onSuccess(@Nullable V bytes) {
-      //System.out.println("Got response :" + Longs.fromByteArray(bytes));
+      //System.out.println("Got response :" + Longs.fromByteArray((byte[])bytes));
       long now = System.currentTimeMillis();
       int latency = (int) (now - start);
       this.stats.record(iteration, latency, nbytes, now);

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <servers>
+  	<server>
+      <id>ossrh</id>
+      <username>xjdr</username>
+ 	  <password>xjeffrose for maven central</password>
+ 	</server>
+  </servers>
+  <activeProfiles>
+    <!--make the profile active all the time -->
+    <activeProfile>securecentral</activeProfile>
+  </activeProfiles>
+  <profiles>
+    <profile>
+      <id>securecentral</id>
+      <!--Override the repository (and pluginRepository) "central" from the
+         Maven Super POM -->
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>
+
+
+ tsu@paypal.com, xlai@paypal.com, shibanerjee@paypal.com, jefrose@paypal.com, rramchandani@paypal.com
+
+
+10.24.24.235:2181,10.24.23.231:2181,10.24.24.23:2181,10.24.23.230:2181

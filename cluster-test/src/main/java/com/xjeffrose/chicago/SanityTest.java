@@ -24,7 +24,7 @@ public class SanityTest {
 
   @Before
   public void setup() throws Exception {
-    Config config = ConfigFactory.load("test").getConfig("testing-servers");
+    Config config = ConfigFactory.load("test-local").getConfig("testing-servers");
 
     for(String server: config.getString("servers").split(",")){
       String serverEndpoint=server.concat(":").concat(config.getString("dbport"));
